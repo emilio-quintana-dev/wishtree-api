@@ -1,17 +1,31 @@
 class CheckoutSessionController < ApplicationController
-  def create
-    session = Stripe::Checkout::Session.create({
-                                                 line_items: [{
-                                                   # Provide the exact Price ID (e.g. pr_1234) of the product you want to sell
-                                                   price: "{{PRICE_ID}}",
-                                                   quantity: 1,
-                                                 }],
-                                                 mode: "payment",
-                                                 success_url: YOUR_DOMAIN + "?success=true",
-                                                 cancel_url: YOUR_DOMAIN + "?canceled=true",
-                                                 automatic_tax: { enabled: true },
-                                               })
+  require "stripe"
 
-    redirect session.url, 303
+  FRONTEND_DOMAIN = "http://localhost:3000/checkout"
+
+  def create
+    Stripe.api_key = ENV["STRIPE_SECRET_KEY"]
+
+    session = Stripe::Checkout::Session.create(
+      {
+        line_items: [{
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: "Test Product",
+            },
+            tax_behavior: "exclusive",
+            unit_amount: 1000,
+          },
+          quantity: 1,
+        }],
+        mode: "payment",
+        success_url: FRONTEND_DOMAIN + "?success=true",
+        cancel_url: FRONTEND_DOMAIN + "?canceled=true",
+        automatic_tax: { enabled: true },
+      },
+    )
+
+    redirect_to(session.url, allow_other_host: true)
   end
 end

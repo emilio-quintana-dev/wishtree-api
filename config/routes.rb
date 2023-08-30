@@ -5,6 +5,8 @@ Rails.application.routes.draw do
 
   resources :users, only: %i[show update]
 
+  post "/create-checkout-session", to: "checkout_session#create"
+
   resources :wishes, only: %i[
     update
     create
