@@ -1,11 +1,5 @@
 class CheckoutSessionController < ApplicationController
-  require "stripe"
-
-  FRONTEND_DOMAIN = "http://localhost:3000/checkout"
-
   def create
-    Stripe.api_key = ENV["STRIPE_SECRET_KEY"]
-
     session = Stripe::Checkout::Session.create(
       {
         line_items: [{
@@ -20,8 +14,8 @@ class CheckoutSessionController < ApplicationController
           quantity: 1,
         }],
         mode: "payment",
-        success_url: FRONTEND_DOMAIN + "?success=true",
-        cancel_url: FRONTEND_DOMAIN + "?canceled=true",
+        success_url: "#{ENV['FRONTEND_DOMAIN']}/checkout?success=true",
+        cancel_url: "#{ENV['FRONTEND_DOMAIN']}/checkout?canceled=true",
         automatic_tax: { enabled: true },
       },
     )
